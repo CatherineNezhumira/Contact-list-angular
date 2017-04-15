@@ -1,0 +1,22 @@
+<div>
+    <div>
+        <input type="text" ng-model="vm.filterData">
+        <button ng-click="vm.filter()">filter</button>
+    </div>
+    <div ng-repeat="contact in vm.contacts">
+        <div>
+            <h1>{{contact.name}}</h1>
+            <h4>{{contact.birthday}}</h4>
+        </div>
+        <button ng-click="vm.deleteContact(contact.id)">delete</button>
+        <button ng-click="vm.editContact(contact)">edit</button>
+    </div>
+    <div>
+        <input type="text" ng-model="vm.newContactModel.name"/>
+        <input type="text" ng-model="vm.newContactModel.birthday"/>
+        <button ng-click="vm.addContact()">Add</button>
+    </div>
+    <error-window error-message="vm.errorMessage"></error-window>
+    <edit-modal contact="vm.editContactModel" visible="vm.editEnabled" on-submit="vm.saveContactChanges"></edit-modal>
+</div>
+
