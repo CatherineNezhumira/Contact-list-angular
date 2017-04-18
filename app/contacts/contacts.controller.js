@@ -7,7 +7,7 @@ function ContactsController(contactsStore) {
     vm.newContactModel = {name: '', birthday: ''};
     vm.editContactModel = {name: '', birthday: ''};
     vm.editEnabled = false;
-    vm.errorMessage = contactsStore.errorMessage;
+    vm.errorMessage = contactsStore.errorData.message;
 
     vm.addContact = addContact;
     vm.deleteContact = deleteContact;
@@ -19,21 +19,16 @@ function ContactsController(contactsStore) {
 
     function activate() {
         contactsStore.init().then(function () {
-            vm.errorMessage = contactsStore.errorMessage;
             vm.contacts = contactsStore.contacts.data;
         });
     }
 
     function addContact() {
-        contactsStore.createContact(vm.newContactModel).then(function () {
-            vm.errorMessage = contactsStore.errorMessage;
-        });
+        contactsStore.createContact(vm.newContactModel);
     }
 
     function deleteContact(contactId) {
-        contactsStore.removeContact(contactId).then(function () {
-            vm.errorMessage = contactsStore.errorMessage;
-        });
+        contactsStore.removeContact(contactId);
     }
 
     function editContact(contact) {
@@ -44,7 +39,6 @@ function ContactsController(contactsStore) {
     function saveContactChanges() {
         contactsStore.updateContact(vm.editContactModel).then(function (contactToUpdate) {
             Object.assign(contactToUpdate, vm.editContactModel);
-            vm.errorMessage = contactsStore.errorMessage;
         });
     }
 
