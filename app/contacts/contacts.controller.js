@@ -9,53 +9,11 @@ function ContactsController(contactsStore) {
     vm.editEnabled = false;
     vm.errorMessage = '';
 
-    Object.assign(vm, {
-        addContact: function () {
-            contactsStore.createContact(vm.newContactModel).then(function (result) {
-                if (result.status !== 201) {
-                    vm.errorMessage = result.statusText;
-                    return;
-                }
-                vm.newContactModel.id = result.data;
-                vm.contacts.push(vm.newContactModel);
-            });
-        },
-        deleteContact: function (contactId) {
-            contactsStore.removeContact(contactId).then(function (result) {
-                if (result.status !== 200) {
-                    vm.errorMessage = result.statusText;
-                    return;
-                }
-                const contactIdToDelete = vm.contacts.indexOf(vm.contacts.find(function (contact) {
-                    return contact.id === contactId;
-                }));
-                vm.contacts.splice(contactIdToDelete, 1);
-            });
-
-        },
-        editContact: function (contact) {
-            vm.editEnabled = true;
-            Object.assign(vm.editContactModel, contact);
-        },
-        saveContactChanges: function () {
-            contactsStore.updateContact(vm.editContactModel).then(function (result) {
-                if (result.status !== 200) {
-                    vm.errorMessage = result.statusText;
-                    return;
-                }
-                const contactToEdit = vm.contacts.find(function (contact) {
-                    return contact.id === vm.editContactModel.id;
-                });
-                Object.assign(contactToEdit, vm.editContactModel);
-            });
-        },
-        filter : function () {
-            vm.contacts = vm.filterData ? vm.contacts.filter(function (contact) {
-                return contact.name.includes(vm.filterData);
-            }) : contactsStore.contacts.data;
-        }
-
-    });
+    vm.addContact = addContact;
+    vm.deleteContact = deleteContact;
+    vm.editContact = editContact;
+    vm.saveContactChanges = saveContactChanges;
+    vm.filter = filter;
 
     activate();
 
@@ -67,6 +25,45 @@ function ContactsController(contactsStore) {
             }
             vm.contacts = contactsStore.contacts.data;
         });
+    }
+
+    function addContact() {
+        contactsStore.createContact(vm.newContactModel).then(function (result) {
+            if (result.status !== 201) {
+                vm.errorMessage = result.statusText;
+                return;
+            }
+            contactsStore.addNewContact(vm.newContactModel, result.data);
+        });
+    }
+
+    function deleteContact(contactId) {
+        contactsStore.removeContact(contactId).then(function (result) {
+            if (result.status !== 200) {
+                vm.errorMessage = result.statusText;
+                return;
+            }
+            contactsStore.removeContactById(contactId);
+        });
+    }
+
+    function editContact(contact) {
+        vm.editEnabled = true;
+        Object.assign(vm.editContactModel, contact);
+    }
+
+    function saveContactChanges() {
+        contactsStore.updateContact(vm.editContactModel).then(function (result) {
+            if (result.status !== 200) {
+                vm.errorMessage = result.statusText;
+                return;
+            }
+            Object.assign(contactsStore.getUpdatedContactData(vm.editContactModel.id), vm.editContactModel);
+        });
+    }
+
+    function filter() {
+        vm.contacts = contactsStore.filterContacts(vm.filterData);
     }
 
 }

@@ -10,7 +10,11 @@ function contactsStore(contactsRepository) {
         init: init,
         updateContact: updateContact,
         createContact: createContact,
-        removeContact: removeContact
+        removeContact: removeContact,
+        filterContacts: filterContacts,
+        addNewContact: addNewContact,
+        removeContactById: removeContactById,
+        getUpdatedContactData: getUpdatedContactData
     };
 
     clear();
@@ -43,6 +47,30 @@ function contactsStore(contactsRepository) {
 
     function updateContact(contact) {
         return contactsRepository.updateContact(contact);
+    }
+
+    function filterContacts(filterData) {
+        return filterData ? service.contacts.data.filter(function (contact) {
+                return contact.name.includes(filterData);
+            }) : service.contacts.data;
+    }
+
+    function addNewContact(newContact, id) {
+        newContact.id = id;
+        service.contacts.data.push(newContact);
+    }
+
+    function removeContactById(id) {
+        const contactIdToDelete = service.contacts.data.indexOf(service.contacts.data.find(function (contact) {
+            return contact.id === id;
+        }));
+        service.contacts.data.splice(contactIdToDelete, 1);
+    }
+
+    function getUpdatedContactData(editContactId) {
+        return service.contacts.data.find(function (contact) {
+            return contact.id === editContactId;
+        });
     }
 
 }
