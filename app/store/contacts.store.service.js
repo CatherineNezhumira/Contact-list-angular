@@ -18,10 +18,13 @@ function contactsStore(contactsRepository) {
     };
 
     clear();
+    const serverErrorMessage = 'Internal server error: 500';
+
     return service;
 
     function clear() {
         service.contacts = {data: [] };
+        service.errorMessage = '';
     }
 
     function init() {
@@ -30,23 +33,50 @@ function contactsStore(contactsRepository) {
 
     function readContacts() {
         return contactsRepository.getContacts().then(function (result) {
-            if (result) {
-                service.contacts.data = result.data;
+            if (result.status !== 200) {
+                service.errorMessage = result.statusText;
+                return;
             }
+            service.contacts.data = result.data;
             return result;
+        }).catch(function (error) {
+            service.errorMessage = serverErrorMessage;
         });
     }
 
     function removeContact(id) {
-        return contactsRepository.deleteContact(id);
+        return contactsRepository.deleteContact(id).then(function (result) {
+            if (result.status !== 200) {
+                service.errorMessage = result.statusText;
+                return;
+            }
+            service.removeContactById(id);
+        }).catch(function (error) {
+            service.errorMessage = serverErrorMessage;
+        });
     }
 
     function createContact(newContact) {
-        return contactsRepository.createContact(newContact);
+        return contactsRepository.createContact(newContact).then(function (result) {
+            if (result.status !== 201) {
+                service.errorMessage = result.statusText;
+                return;
+            }
+            service.addNewContact(newContact, result.data);
+        }).catch(function (error) {
+            service.errorMessage = serverErrorMessage;
+        });
     }
 
     function updateContact(contact) {
-        return contactsRepository.updateContact(contact);
+        return contactsRepository.updateContact(contact).then(function (result) {
+            if (result.status !== 200) {
+                service.errorMessage = result.statusText;
+            }
+            return service.getUpdatedContactData(contact.id);
+        }).catch(function (error) {
+            service.errorMessage = serverErrorMessage;
+        });
     }
 
     function filterContacts(filterData) {

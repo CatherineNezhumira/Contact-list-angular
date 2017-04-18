@@ -7,7 +7,7 @@ function ContactsController(contactsStore) {
     vm.newContactModel = {name: '', birthday: ''};
     vm.editContactModel = {name: '', birthday: ''};
     vm.editEnabled = false;
-    vm.errorMessage = '';
+    vm.errorMessage = contactsStore.errorMessage;
 
     vm.addContact = addContact;
     vm.deleteContact = deleteContact;
@@ -18,32 +18,21 @@ function ContactsController(contactsStore) {
     activate();
 
     function activate() {
-        contactsStore.init().then(function (result) {
-            if (result.status !== 200) {
-                vm.errorMessage = result.statusText;
-                return;
-            }
+        contactsStore.init().then(function () {
+            vm.errorMessage = contactsStore.errorMessage;
             vm.contacts = contactsStore.contacts.data;
         });
     }
 
     function addContact() {
-        contactsStore.createContact(vm.newContactModel).then(function (result) {
-            if (result.status !== 201) {
-                vm.errorMessage = result.statusText;
-                return;
-            }
-            contactsStore.addNewContact(vm.newContactModel, result.data);
+        contactsStore.createContact(vm.newContactModel).then(function () {
+            vm.errorMessage = contactsStore.errorMessage;
         });
     }
 
     function deleteContact(contactId) {
-        contactsStore.removeContact(contactId).then(function (result) {
-            if (result.status !== 200) {
-                vm.errorMessage = result.statusText;
-                return;
-            }
-            contactsStore.removeContactById(contactId);
+        contactsStore.removeContact(contactId).then(function () {
+            vm.errorMessage = contactsStore.errorMessage;
         });
     }
 
@@ -53,12 +42,9 @@ function ContactsController(contactsStore) {
     }
 
     function saveContactChanges() {
-        contactsStore.updateContact(vm.editContactModel).then(function (result) {
-            if (result.status !== 200) {
-                vm.errorMessage = result.statusText;
-                return;
-            }
-            Object.assign(contactsStore.getUpdatedContactData(vm.editContactModel.id), vm.editContactModel);
+        contactsStore.updateContact(vm.editContactModel).then(function (contactToUpdate) {
+            Object.assign(contactToUpdate, vm.editContactModel);
+            vm.errorMessage = contactsStore.errorMessage;
         });
     }
 
